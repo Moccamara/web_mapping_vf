@@ -200,26 +200,28 @@ with col_map:
     # Display map and capture drawn polygons
     map_data = st_folium(m, height=500, returned_objects=["all_drawings"], use_container_width=True)
 
-    # Polygon-based pie chart under map
-    if map_data and "all_drawings" in map_data and map_data["all_drawings"]:
-        last_feature = map_data["all_drawings"][-1]
-        drawn_polygon = shape(last_feature["geometry"])
-        if drawn_polygon is not None and points_gdf is not None:
-            pts_in_polygon = points_gdf[points_gdf.geometry.within(drawn_polygon)]
-            if not pts_in_polygon.empty:
-                m_poly = int(pts_in_polygon["Masculin"].sum()) if "Masculin" in pts_in_polygon.columns else 0
-                f_poly = int(pts_in_polygon["Feminin"].sum()) if "Feminin" in pts_in_polygon.columns else 0
-                st.subheader("🟢 Points inside drawn polygon")
-                st.markdown(f"- 👨 **M**: {m_poly}  \n- 👩 **F**: {f_poly}  \n- 👥 **Total**: {m_poly+f_poly}")
+    # Polygon-based statistics under map
+if map_data and "all_drawings" in map_data and map_data["all_drawings"]:
+    last_feature = map_data["all_drawings"][-1]
+    drawn_polygon = shape(last_feature["geometry"])
 
-                fig_poly, ax_poly = plt.subplots(figsize=(0.6,0.6))
-                ax_poly.pie([m_poly,f_poly], labels=["M","F"], autopct="%1.1f%%", startangle=90)
-                ax_poly.axis("equal")
-                st.pyplot(fig_poly)
-            else:
-                st.info("No points inside drawn polygon.")
+    if drawn_polygon is not None and points_gdf is not None:
+        pts_in_polygon = points_gdf[points_gdf.geometry.within(drawn_polygon)]
 
-with col_chart:
+        if not pts_in_polygon.empty:
+            m_poly = int(pts_in_polygon["Masculin"].sum()) if "Masculin" in pts_in_polygon.columns else 0
+            f_poly = int(pts_in_polygon["Feminin"].sum()) if "Feminin" in pts_in_polygon.columns else 0
+
+            st.subheader("🟢 Points inside drawn polygon")
+            st.markdown(
+                f"- 👨 **M**: {m_poly}  \n"
+                f"- 👩 **F**: {f_poly}  \n"
+                f"- 👥 **Total**: {m_poly + f_poly}"
+            )
+
+        else:
+            st.info("No points inside drawn polygon.")
+
     # Existing SE charts remain unchanged
     if idse_selected=="No filter":
         st.info("Select SE.")
@@ -264,7 +266,8 @@ with col_chart:
 st.markdown("""
 ---
 **Geospatial Enterprise Web Mapping** Developed with Streamlit, Folium & GeoPandas  
-** Dr.CAMARA MOC, PhD – Geomatics Engineering** © 2025
+** Dr.Mahamadou CAMARA, PhD – Geomatics Engineering** © 2025
 """)
+
 
 
